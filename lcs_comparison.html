@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LCS Algorithm Comparison</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Libre+Baskerville:ital@1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --amber: #c8890a;
+    --amber-hover: #a06c00;
+    --amber-bg: #fdf3dc;
+    --amber-border: #d4a017;
+    --bg: #f8f7f4;
+    --surface: #ffffff;
+    --surface2: #f1efe8;
+    --border: rgba(0,0,0,0.12);
+    --border-strong: rgba(0,0,0,0.22);
+    --text: #1a1a18;
+    --text-2: #5f5e5a;
+    --text-3: #888780;
+    --radius: 10px;
+    --radius-lg: 14px;
+    --cell: 40px;
+    --gap: 3px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #131311;
+      --surface: #1e1d1a;
+      --surface2: #2a2926;
+      --border: rgba(255,255,255,0.1);
+      --border-strong: rgba(255,255,255,0.2);
+      --text: #e8e6df;
+      --text-2: #9c9a92;
+      --text-3: #6b6a64;
+      --amber-bg: #251900;
+      --amber-border: #7a5200;
+    }
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── Header ── */
+  .site-header {
+    background: var(--surface);
+    border-bottom: 0.5px solid var(--border);
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+  }
+  .logo {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -.3px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .logo-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    background: var(--amber);
+    color: #fff;
+    border-radius: 99px;
+    letter-spacing: .06em;
+  }
+  .header-tag {
+    font-size: 11px;
+    color: var(--text-3);
+    font-family: 'Libre Baskerville', serif;
+    font-style: italic;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: var(--surface);
+    border-bottom: 0.5px solid var(--border);
+    padding: 3rem 2rem 2.5rem;
+    text-align: center;
+  }
+  .hero-title {
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 700;
+    letter-spacing: -1.5px;
+    color: var(--text);
+    line-height: 1.1;
+    margin-bottom: .6rem;
+  }
+  .hero-title span { color: var(--amber); }
+  .hero-sub {
+    font-size: 13px;
+    color: var(--text-2);
+    font-family: 'Libre Baskerville', serif;
+    font-style: italic;
+    line-height: 1.7;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* ── Main content ── */
+  .main { max-width: 900px; margin: 0 auto; padding: 2rem; }
+
+  /* ── Input panel ── */
+  .input-panel {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .panel-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--text-3);
+    margin-bottom: 1rem;
+  }
+  .inputs-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+  .field {
+    flex: 1;
+    min-width: 160px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .field label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--text-2);
+  }
+  .field input {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    width: 100%;
+    transition: border-color .15s;
+  }
+  .field input:focus {
+    outline: none;
+    border-color: var(--amber);
+    box-shadow: 0 0 0 3px rgba(200,137,10,.12);
+  }
+  .run-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 11px 24px;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--amber);
+    color: #fff;
+    cursor: pointer;
+    white-space: nowrap;
+    letter-spacing: .04em;
+    transition: background .15s, transform .1s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .run-btn:hover { background: var(--amber-hover); }
+  .run-btn:active { transform: scale(.97); }
+  .run-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+
+  /* ── Warning ── */
+  .warn {
+    display: none;
+    font-size: 12px;
+    color: var(--amber-hover);
+    padding: 9px 14px;
+    border-radius: var(--radius);
+    background: var(--amber-bg);
+    border: 0.5px solid var(--amber-border);
+    margin-top: 10px;
+  }
+  .warn.show { display: block; }
+
+  /* ── Algo cards ── */
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--text-3);
+    margin-bottom: .75rem;
+  }
+  .algo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 600px) { .algo-grid { grid-template-columns: 1fr; } }
+  .algo-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.1rem 1.1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .algo-card.fastest {
+    border-color: var(--amber);
+    box-shadow: 0 0 0 3px rgba(200,137,10,.1);
+  }
+  .card-header { display: flex; align-items: center; justify-content: space-between; }
+  .algo-name {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    color: var(--text-3);
+  }
+  .fastest-tag {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 7px;
+    background: var(--amber);
+    color: #fff;
+    border-radius: 99px;
+    letter-spacing: .06em;
+    opacity: 0;
+    transition: opacity .3s;
+  }
+  .algo-card.fastest .fastest-tag { opacity: 1; }
+  .algo-lcs {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: .2em;
+    color: var(--amber);
+    min-height: 24px;
+    word-break: break-all;
+    line-height: 1.3;
+  }
+  .algo-meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2px;
+  }
+  .algo-meta {
+    font-size: 11px;
+    color: var(--text-2);
+  }
+  .algo-meta strong { color: var(--text); font-weight: 600; }
+  .time-track {
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 2px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+  .time-fill {
+    height: 100%;
+    background: var(--amber);
+    border-radius: 2px;
+    width: 0;
+    transition: width .6s cubic-bezier(.4,0,.2,1);
+  }
+  .complexity-badge {
+    font-size: 10px;
+    color: var(--text-3);
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 2px;
+  }
+
+  /* ── DP Table ── */
+  .table-panel {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.25rem 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .table-scroll { overflow-x: auto; padding-bottom: 4px; }
+  .table-wrap { display: inline-flex; flex-direction: column; gap: var(--gap); min-width: max-content; }
+  .trow { display: flex; gap: var(--gap); align-items: center; }
+  .tcell {
+    width: var(--cell);
+    height: var(--cell);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    border-radius: 5px;
+  }
+  .tcell.hd {
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--text-2);
+    background: var(--surface2);
+  }
+  .tcell.hd.ch { border: 0.5px solid var(--border); }
+  .tcell.dp {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    color: var(--text);
+  }
+  .tcell.dp.path {
+    background: var(--amber);
+    color: #fff;
+    border-color: var(--amber);
+    font-weight: 700;
+  }
+  .tcell.dp.match-hl {
+    background: var(--amber-bg);
+    border-color: var(--amber-border);
+  }
+  .tcell.row-lbl {
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--text-2);
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+  }
+  .legend {
+    display: flex;
+    gap: 18px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .leg-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-2);
+  }
+  .leg-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  /* ── Explainer ── */
+  .explainer {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 600px) { .explainer { grid-template-columns: 1fr; } }
+  .exp-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1rem .9rem;
+  }
+  .exp-name {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    color: var(--text-3);
+    margin-bottom: .5rem;
+  }
+  .exp-desc {
+    font-size: 11px;
+    color: var(--text-2);
+    line-height: 1.8;
+    font-family: 'Libre Baskerville', serif;
+    font-style: italic;
+  }
+  .exp-complex {
+    margin-top: .6rem;
+    font-size: 11px;
+    color: var(--text-3);
+  }
+  .exp-complex span {
+    color: var(--amber);
+    font-weight: 600;
+  }
+
+  /* ── Footer ── */
+  .site-footer {
+    border-top: 0.5px solid var(--border);
+    text-align: center;
+    padding: 1.5rem 2rem;
+    font-size: 11px;
+    color: var(--text-3);
+    margin-top: 1rem;
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate { animation: fadeUp .4s ease both; }
+  .animate:nth-child(2) { animation-delay: .07s; }
+  .animate:nth-child(3) { animation-delay: .14s; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo">
+      LCS<span class="logo-badge">3 ALGOS</span>
+    </div>
+    <div class="header-tag">Longest Common Subsequence</div>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <h1 class="hero-title">LCS <span>Algorithm</span> Comparison</h1>
+  <p class="hero-sub">Compare Recursive, Brute Force, and Dynamic Programming side by side — with live timing and DP table visualization.</p>
+</section>
+
+<!-- Main -->
+<main class="main">
+
+  <!-- Input -->
+  <div class="input-panel">
+    <div class="panel-label">Input Strings</div>
+    <div class="inputs-row">
+      <div class="field">
+        <label>String A</label>
+        <input id="strA" value="ALGORITHM" maxlength="20" spellcheck="false" oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div class="field">
+        <label>String B</label>
+        <input id="strB" value="ALTRUISTIC" maxlength="20" spellcheck="false" oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <button class="run-btn" onclick="compute()">
+        <svg viewBox="0 0 14 14"><polygon points="3,1 13,7 3,13" stroke-linejoin="round"/></svg>
+        Run
+      </button>
+    </div>
+    <div class="warn" id="warn">⚠ Brute force is disabled for strings longer than 20 characters — exponential time complexity (2ⁿ) makes it impractical.</div>
+  </div>
+
+  <!-- Results -->
+  <div class="section-label">Results</div>
+  <div class="algo-grid" id="algo-grid">
+    <div class="algo-card animate" id="card-r">
+      <div class="card-header">
+        <div class="algo-name">Recursive + Memo</div>
+        <div class="fastest-tag">FASTEST</div>
+      </div>
+      <div class="algo-lcs" id="r-lcs">—</div>
+      <div class="algo-meta-row">
+        <div class="algo-meta">Length: <strong id="r-len">—</strong></div>
+        <div class="algo-meta">Time: <strong id="r-time">—</strong></div>
+      </div>
+      <div class="time-track"><div class="time-fill" id="r-bar"></div></div>
+      <div class="complexity-badge">O(m·n) time &amp; space</div>
+    </div>
+    <div class="algo-card animate" id="card-b">
+      <div class="card-header">
+        <div class="algo-name">Brute Force</div>
+        <div class="fastest-tag">FASTEST</div>
+      </div>
+      <div class="algo-lcs" id="b-lcs">—</div>
+      <div class="algo-meta-row">
+        <div class="algo-meta">Length: <strong id="b-len">—</strong></div>
+        <div class="algo-meta">Time: <strong id="b-time">—</strong></div>
+      </div>
+      <div class="time-track"><div class="time-fill" id="b-bar"></div></div>
+      <div class="complexity-badge">O(2ⁿ · m) time</div>
+    </div>
+    <div class="algo-card animate" id="card-d">
+      <div class="card-header">
+        <div class="algo-name">Dynamic Programming</div>
+        <div class="fastest-tag">FASTEST</div>
+      </div>
+      <div class="algo-lcs" id="d-lcs">—</div>
+      <div class="algo-meta-row">
+        <div class="algo-meta">Length: <strong id="d-len">—</strong></div>
+        <div class="algo-meta">Time: <strong id="d-time">—</strong></div>
+      </div>
+      <div class="time-track"><div class="time-fill" id="d-bar"></div></div>
+      <div class="complexity-badge">O(m·n) time &amp; space</div>
+    </div>
+  </div>
+
+  <!-- DP Table -->
+  <div class="table-panel">
+    <div class="section-label">DP Table</div>
+    <div class="table-scroll" id="table-scroll"></div>
+    <div class="legend">
+      <div class="leg-item">
+        <div class="leg-swatch" style="background:var(--amber)"></div>
+        Optimal backtrack path
+      </div>
+      <div class="leg-item">
+        <div class="leg-swatch" style="background:var(--amber-bg);border:0.5px solid var(--amber-border)"></div>
+        Character match
+      </div>
+      <div class="leg-item">
+        <div class="leg-swatch" style="background:var(--surface2);border:0.5px solid var(--border)"></div>
+        DP cell
+      </div>
+    </div>
+  </div>
+
+  <!-- Explainer -->
+  <div class="section-label">How Each Algorithm Works</div>
+  <div class="explainer">
+    <div class="exp-card">
+      <div class="exp-name">Recursive + Memoization</div>
+      <div class="exp-desc">Breaks the problem into subproblems top-down. When characters match, recurse diagonally; otherwise take the best of two branches. Results cached to avoid recomputation.</div>
+      <div class="exp-complex">Time: <span>O(m·n)</span> &nbsp; Space: <span>O(m·n)</span></div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-name">Brute Force</div>
+      <div class="exp-desc">Generates all 2ⁿ subsequences of string A, then checks each one against string B. Correct but devastatingly slow — impractical beyond ~20 characters.</div>
+      <div class="exp-complex">Time: <span>O(2ⁿ · m)</span> &nbsp; Space: <span>O(2ⁿ)</span></div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-name">Dynamic Programming</div>
+      <div class="exp-desc">Fills an (m+1)×(n+1) table bottom-up. Each cell stores the LCS length of the prefixes seen so far. Backtrack from dp[m][n] to reconstruct the actual subsequence.</div>
+      <div class="exp-complex">Time: <span>O(m·n)</span> &nbsp; Space: <span>O(m·n)</span></div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  LCS Algorithm Comparison &nbsp;·&nbsp; Recursive · Brute Force · Dynamic Programming
+</footer>
+
+<script>
+// ── Algorithms ──────────────────────────────────────────────
+
+function recursiveLCS(s1, s2, m, n, memo) {
+  if (m === 0 || n === 0) return "";
+  const key = m + "," + n;
+  if (memo[key] !== undefined) return memo[key];
+  let result;
+  if (s1[m-1] === s2[n-1]) {
+    result = recursiveLCS(s1, s2, m-1, n-1, memo) + s1[m-1];
+  } else {
+    const a = recursiveLCS(s1, s2, m-1, n, memo);
+    const b = recursiveLCS(s1, s2, m, n-1, memo);
+    result = a.length >= b.length ? a : b;
+  }
+  memo[key] = result;
+  return result;
+}
+
+function getSubsequences(s) {
+  let result = [""];
+  for (const ch of s) result = result.concat(result.map(x => x + ch));
+  return result;
+}
+function isSubsequence(sub, s) {
+  let i = 0;
+  for (const ch of s) { if (i < sub.length && ch === sub[i]) i++; }
+  return i === sub.length;
+}
+function bruteForceLCS(s1, s2) {
+  let best = "";
+  for (const sub of getSubsequences(s1)) {
+    if (sub.length > best.length && isSubsequence(sub, s2)) best = sub;
+  }
+  return best;
+}
+
+function dpLCS(s1, s2) {
+  const m = s1.length, n = s2.length;
+  const dp = Array.from({length: m+1}, () => new Array(n+1).fill(0));
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (s1[i-1] === s2[j-1]) dp[i][j] = dp[i-1][j-1] + 1;
+      else dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+    }
+  }
+  let lcs = "", i = m, j = n;
+  while (i > 0 && j > 0) {
+    if (s1[i-1] === s2[j-1]) { lcs = s1[i-1] + lcs; i--; j--; }
+    else if (dp[i-1][j] > dp[i][j-1]) i--;
+    else j--;
+  }
+  return { lcs, dp };
+}
+
+// ── Helpers ─────────────────────────────────────────────────
+
+function fmtTime(ms) {
+  if (ms < 0.01) return "< 0.01 ms";
+  if (ms < 1) return ms.toFixed(4) + " ms";
+  if (ms < 1000) return ms.toFixed(2) + " ms";
+  return (ms / 1000).toFixed(3) + " s";
+}
+
+function setCard(id, lcs, len, time) {
+  document.getElementById(id + '-lcs').textContent = lcs || '(none)';
+  document.getElementById(id + '-len').textContent = len;
+  document.getElementById(id + '-time').textContent = fmtTime(time);
+}
+
+function buildTable(s1, s2, dp) {
+  const m = s1.length, n = s2.length;
+  const path = new Set(), matches = new Set();
+  let i = m, j = n;
+  while (i > 0 && j > 0) {
+    path.add(i + ',' + j);
+    if (s1[i-1] === s2[j-1]) { matches.add(i + ',' + j); i--; j--; }
+    else if (dp[i-1][j] > dp[i][j-1]) i--;
+    else j--;
+  }
+
+  const scroll = document.getElementById('table-scroll');
+  const wrap = document.createElement('div'); wrap.className = 'table-wrap';
+
+  // Header row
+  const hRow = document.createElement('div'); hRow.className = 'trow';
+  ['', ' ', 'ε', ...s2].forEach((ch, idx) => {
+    const c = document.createElement('div');
+    c.className = 'tcell hd' + (idx >= 2 ? ' ch' : '');
+    c.textContent = ch; hRow.appendChild(c);
+  });
+  wrap.appendChild(hRow);
+
+  // Data rows
+  for (let r = 0; r <= m; r++) {
+    const row = document.createElement('div'); row.className = 'trow';
+    const rl = document.createElement('div'); rl.className = 'tcell row-lbl';
+    rl.textContent = r === 0 ? 'ε' : s1[r-1]; row.appendChild(rl);
+    const empty = document.createElement('div'); empty.className = 'tcell hd'; row.appendChild(empty);
+    for (let c = 0; c <= n; c++) {
+      const cell = document.createElement('div');
+      const key = r + ',' + c;
+      const isPath = path.has(key), isMatch = matches.has(key);
+      cell.className = 'tcell dp' + (isPath ? ' path' : '') + (isMatch && !isPath ? ' match-hl' : '');
+      cell.textContent = dp[r][c]; row.appendChild(cell);
+    }
+    wrap.appendChild(row);
+  }
+  scroll.innerHTML = ''; scroll.appendChild(wrap);
+}
+
+// ── Main compute ─────────────────────────────────────────────
+
+function compute() {
+  const s1 = document.getElementById('strA').value.trim().toUpperCase();
+  const s2 = document.getElementById('strB').value.trim().toUpperCase();
+  if (!s1 || !s2) return;
+
+  const bfCapped = s1.length > 20 || s2.length > 20;
+  document.getElementById('warn').classList.toggle('show', bfCapped);
+
+  // Reset bars
+  ['r', 'b', 'd'].forEach(id => {
+    document.getElementById(id + '-bar').style.width = '0';
+  });
+
+  // Run algorithms
+  let t = performance.now();
+  const r = recursiveLCS(s1, s2, s1.length, s2.length, {});
+  const rTime = performance.now() - t;
+
+  t = performance.now();
+  const b = bfCapped ? null : bruteForceLCS(s1, s2);
+  const bTime = performance.now() - t;
+
+  t = performance.now();
+  const { lcs: d, dp } = dpLCS(s1, s2);
+  const dTime = performance.now() - t;
+
+  // Set cards
+  setCard('r', r, r.length, rTime);
+  if (bfCapped) {
+    document.getElementById('b-lcs').textContent = '(skipped)';
+    document.getElementById('b-len').textContent = '—';
+    document.getElementById('b-time').textContent = '—';
+  } else {
+    setCard('b', b, b.length, bTime);
+  }
+  setCard('d', d, d.length, dTime);
+
+  // Time bars
+  const times = [rTime, bfCapped ? 0 : bTime, dTime];
+  const maxTime = Math.max(...times) || 1;
+  setTimeout(() => {
+    document.getElementById('r-bar').style.width = (rTime / maxTime * 100) + '%';
+    document.getElementById('b-bar').style.width = (bfCapped ? 0 : bTime / maxTime * 100) + '%';
+    document.getElementById('d-bar').style.width = (dTime / maxTime * 100) + '%';
+  }, 50);
+
+  // Fastest badge
+  ['card-r', 'card-b', 'card-d'].forEach(id => document.getElementById(id).classList.remove('fastest'));
+  const validTimes = [
+    { id: 'card-r', t: rTime },
+    { id: 'card-d', t: dTime },
+    ...(bfCapped ? [] : [{ id: 'card-b', t: bTime }])
+  ];
+  const fastest = validTimes.reduce((a, b) => a.t <= b.t ? a : b);
+  document.getElementById(fastest.id).classList.add('fastest');
+
+  buildTable(s1, s2, dp);
+}
+
+// Run on load
+compute();
+
+// Run on Enter key
+document.addEventListener('keydown', e => { if (e.key === 'Enter') compute(); });
+</script>
+</body>
+</html>
