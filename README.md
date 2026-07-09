@@ -36,4 +36,6 @@ An interactive web application that compares three approaches for solving the Lo
 
 ## 👨‍💻 Author
 
-**Mostafa Mohamed**
+**
+- Mostafa Mohamed
+**
